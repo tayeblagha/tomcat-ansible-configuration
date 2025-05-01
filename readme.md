@@ -1,6 +1,6 @@
 # Configuration DevOpsTest
 
-## 🎥 Démo vidéo 
+## 🎥 Démo vidéo (ajuster la qualité à 720p)
  [:eyes: Voir démonstration  ](https://drive.google.com/file/d/1HWZYXceaLYLhyQ2ZrTyL-xhtl1WphEXY/view?usp=drive_link)
 
 ---

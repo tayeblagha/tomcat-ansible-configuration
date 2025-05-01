@@ -16,8 +16,17 @@
 ---
 
 ## 📁 Arborescence du projet  
-DevOpsTest/ ├── deploy/ │ ├── tomcat_deploy.yml │ └── sample.war
-├── prod/ │ ├── Dockerfile │ └── tomcat_test.sh └── tomcat_deploy.sh
+
+```
+DevOpsTest/
+├── deploy/
+│   ├── tomcat_deploy.yml
+│   └── sample.war (provided)
+├── prod/
+│   ├── Dockerfile
+│   └── tomcat_test.sh
+└── tomcat_deploy.sh
+```
 
 
 ---

@@ -6,14 +6,24 @@ fi
 
 ENVIRONMENT=$1
 
+# If ENVIRONMENT is not PROD, set it to DEV
+if [ "$ENVIRONMENT" != "PROD" ]; then
+  ENVIRONMENT="DEV"
+fi
+
+# Clean up existing container
+docker rm -f tomcat-container 2>/dev/null
+
 # Build Docker image
-docker build -t tomcat-container ./prod
+docker build -t tayeblagha/tomcat ./prod
 
 # Run container with privileged mode and volume mount
-# Start the container with systemd
-docker run --privileged -d --name tomcat-container -p 8080:8080 -v $(pwd)/deploy:/data tayeblagha/tomcat
+docker run --privileged -d --name tomcat-containerr -p 8080:8080 \
+  -v $(pwd)/deploy:/data \
+  tayeblagha/tomcat
 
-# Execute the test script inside the running container
-docker exec -it tomcat-container /tomcat_test.sh $ENVIRONMENT
+# Wait for systemd initialization
+sleep 15
 
-
+# Execute test script
+docker exec -it tomcat-containerr /tomcat_test.sh $ENVIRONMENT

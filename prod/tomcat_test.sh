@@ -28,7 +28,7 @@ echo ""
 
 echo "Check tomcat service status"
 echo "---------------------------"
-service tomcat status
+service tomcat9 status
 echo ""
 
 echo "Check application home page"

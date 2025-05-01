@@ -1,6 +1,6 @@
 FROM debian:bullseye
 
-# Install dependencies & systemd tools
+# Install dependencies & systemd
 RUN apt-get update && \
     apt-get install -y \
       ansible \
@@ -9,7 +9,8 @@ RUN apt-get update && \
       procps \
       systemd \
       systemd-sysv \
-      dbus && \
+      dbus \
+      net-tools && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

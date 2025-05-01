@@ -1,13 +1,18 @@
 ---
-- name: Deploy Tomcat
+- name: Test technique(DevOps)
   hosts: all
   become: yes
 
   vars:
     tomcat_version: 9.0.85
     install_dir: /opt/tomcat
+    env: DEV  # Default environment value
+    tomcat_major_version: 9
+    jvm_heap_size_dev: 256m
+    jvm_heap_size_prod: 512m
 
   tasks:
+
     - name: Install Java
       apt:
         name: openjdk-11-jdk
@@ -28,7 +33,7 @@
 
     - name: Download Tomcat
       get_url:
-        url: "https://archive.apache.org/dist/tomcat/tomcat-9/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
+        url: "https://archive.apache.org/dist/tomcat/tomcat-{{ tomcat_major_version }}/v{{ tomcat_version }}/bin/apache-tomcat-{{ tomcat_version }}.tar.gz"
         dest: /tmp/tomcat.tar.gz
 
     - name: Remove existing Tomcat directory if present
@@ -65,6 +70,21 @@
           CATALINA_HOME={{ install_dir }}
           JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
+    - name: Set JVM heap size based on environment
+      blockinfile:
+        path: "{{ install_dir }}/bin/setenv.sh"
+        create: yes
+        block: |
+          #!/bin/sh
+          {% if env == 'PROD' %}
+          export JAVA_OPTS="-Xms{{ jvm_heap_size_prod }} -Xmx{{ jvm_heap_size_prod }}"
+          {% else %}
+          export JAVA_OPTS="-Xms{{ jvm_heap_size_dev }} -Xmx{{ jvm_heap_size_dev }}"
+          {% endif %}
+        owner: tomcat
+        group: tomcat
+        mode: '0755'
+
     - name: Deploy sample.war
       get_url:
         url: https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war
@@ -72,12 +92,28 @@
         owner: tomcat
         group: tomcat
 
+    - name: Create Tomcat log directory
+      file:
+        path: /var/log/tomcat{{ tomcat_major_version }}
+        state: directory
+        owner: tomcat
+        group: tomcat
+        mode: '0755'
+
+    - name: Update catalina.out symlink
+      file:
+        src: "{{ install_dir }}/logs/catalina.out"
+        dest: /var/log/tomcat{{ tomcat_major_version }}/catalina.out
+        state: link
+        force: yes
+        follow: no
+
     - name: Create Systemd Service
       copy:
-        dest: /etc/systemd/system/tomcat.service
+        dest: /etc/systemd/system/tomcat{{ tomcat_major_version }}.service
         content: |
           [Unit]
-          Description=Apache Tomcat
+          Description=Apache Tomcat {{ tomcat_major_version }}
           After=syslog.target network.target
 
           [Service]
@@ -89,6 +125,8 @@
           Environment=CATALINA_BASE={{ install_dir }}
           ExecStart={{ install_dir }}/bin/startup.sh
           ExecStop={{ install_dir }}/bin/shutdown.sh
+          StandardOutput=journal
+          StandardError=journal
           Restart=on-failure
 
           [Install]
@@ -100,6 +138,26 @@
 
     - name: Enable and start Tomcat service
       systemd:
-        name: tomcat
+        name: tomcat{{ tomcat_major_version }}
         state: started
         enabled: yes
+
+    - name: Wait for system completion (DEV environment)
+      pause:
+        seconds: 10
+        prompt: "Waiting for DEV system completion (10 seconds)..."
+      when: env == 'DEV'
+
+    - name: Wait for system completion (PROD environment)
+      pause:
+        seconds: 15
+        prompt: "Waiting for PROD system completion (15 seconds - more thorough checks)..."
+      when: env == 'PROD'
+
+    - name: Display final message
+      debug:
+        msg: |
+          Tomcat {{ tomcat_major_version }} installation completed!
+          Environment: {{ env }}
+          JVM Heap Size: {% if env == 'PROD' %}{{ jvm_heap_size_prod }}{% else %}{{ jvm_heap_size_dev }}{% endif %}
+          Installation directory: {{ install_dir }}

@@ -1,7 +1,6 @@
 # Configuration DevOpsTest
 
-## 🎥 Démo vidéo  
-[Voir la démonstration vidéo](https://drive.google.com/file/d/1HWZYXceaLYLhyQ2ZrTyL-xhtl1WphEXY/view?usp=drive_link)
+## 🎥 Démo vidéo  [Voir la démonstration ](https://drive.google.com/file/d/1HWZYXceaLYLhyQ2ZrTyL-xhtl1WphEXY/view?usp=drive_link)
 
 ---
 

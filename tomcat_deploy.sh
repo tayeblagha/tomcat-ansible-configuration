@@ -15,15 +15,16 @@ fi
 docker rm -f tomcat-container 2>/dev/null
 
 # Build Docker image
-docker build -t tayeblagha/tomcat ./prod
+docker build -t tayeblagha/tomcatdeployment ./prod
 
 # Run container with privileged mode and volume mount
 docker run --privileged -d --name tomcat-containerr -p 8080:8080 \
+  --name="tomcatdeployment" \
   -v $(pwd)/deploy:/data \
-  tayeblagha/tomcat
+  tayeblagha/tomcatdeployment
 
 # Wait for systemd initialization
-sleep 15
+sleep 7
 
 # Execute test script
-docker exec -it tomcat-containerr /tomcat_test.sh $ENVIRONMENT
+docker exec -it tomcatdeployment /tomcat_test.sh $ENVIRONMENT

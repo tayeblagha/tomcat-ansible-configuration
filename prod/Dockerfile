@@ -1,8 +1,8 @@
-FROM debian:bullseye
+FROM debian:bullseye-slim
 
 # Install dependencies & systemd
 RUN apt-get update && \
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
       ansible \
       curl \
       openjdk-11-jdk \
